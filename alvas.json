@@ -1,0 +1,173 @@
+{
+  "name": "alvas",
+  "nodes": [
+    {
+      "name": "introduction",
+      "type": "conversation",
+      "isStart": true,
+      "metadata": {
+        "position": {
+          "x": -401.7954385160323,
+          "y": -105.38631554809658
+        }
+      },
+      "prompt": "",
+      "messagePlan": {
+        "firstMessage": "Hello, {{username}}! Let's prepare your interview. I'll ask you a few question and generate a perfect interview just for you. Are you ready?"
+      },
+      "toolIds": []
+    },
+    {
+      "name": "conversation_1763488633931",
+      "type": "conversation",
+      "metadata": {
+        "position": {
+          "x": -403.2031290946034,
+          "y": 318.16427746667983
+        }
+      },
+      "prompt": "What role would you like to train for? \nFor example Frontend, backend, Fullstack, Design, UX",
+      "messagePlan": {
+        "firstMessage": "role"
+      },
+      "toolIds": []
+    },
+    {
+      "name": "API Request",
+      "type": "tool",
+      "metadata": {
+        "position": {
+          "x": -402.9637959182911,
+          "y": 734.7529388926469
+        }
+      },
+      "tool": {
+        "url": "https://ai-mock-interviews-bkyeup5vo-akshaycp05s-projects.vercel.app/api/vapi/generate",
+        "body": {
+          "type": "object",
+          "required": [
+            "type",
+            "level",
+            "techstack",
+            "amount",
+            "text",
+            "role"
+          ],
+          "properties": {
+            "role": {
+              "type": "string",
+              "default": "",
+              "description": "What role would you like to train for?"
+            },
+            "text": {
+              "type": "string",
+              "default": "",
+              "description": ""
+            },
+            "type": {
+              "type": "string",
+              "default": "",
+              "description": "Are you aimimg for a technical,behavioral or mixed interview?"
+            },
+            "level": {
+              "type": "string",
+              "default": "",
+              "description": "The job experience level"
+            },
+            "amount": {
+              "type": "string",
+              "default": "",
+              "description": "how many questions would you like to prepare you?"
+            },
+            "techstack": {
+              "type": "string",
+              "default": "",
+              "description": "A list of technologies to cover during the job interview."
+            }
+          }
+        },
+        "type": "apiRequest",
+        "method": "POST",
+        "headers": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "string",
+              "value": "1"
+            }
+          }
+        },
+        "function": {
+          "name": "api_request_tool",
+          "parameters": {
+            "type": "object",
+            "required": [],
+            "properties": {}
+          },
+          "description": "API request tool"
+        },
+        "messages": [
+          {
+            "type": "request-start",
+            "blocking": false
+          }
+        ],
+        "variableExtractionPlan": {
+          "schema": {
+            "type": "object",
+            "required": [],
+            "properties": {}
+          },
+          "aliases": []
+        }
+      }
+    },
+    {
+      "name": "conversation_1763490130995",
+      "type": "conversation",
+      "metadata": {
+        "position": {
+          "x": -404.6666414177804,
+          "y": 1189.0943988313672
+        }
+      },
+      "prompt": "Say that the interview has been generated and thank the user for the call",
+      "messagePlan": {
+        "firstMessage": ""
+      },
+      "toolIds": []
+    },
+    {
+      "name": "hangup_1763490270942",
+      "type": "tool",
+      "metadata": {
+        "position": {
+          "x": -404.62029839020454,
+          "y": 1536.1565923022595
+        }
+      },
+      "tool": {
+        "type": "endCall"
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "introduction",
+      "to": "conversation_1763488633931"
+    },
+    {
+      "from": "conversation_1763488633931",
+      "to": "API Request"
+    },
+    {
+      "from": "API Request",
+      "to": "conversation_1763490130995"
+    },
+    {
+      "from": "conversation_1763490130995",
+      "to": "hangup_1763490270942"
+    }
+  ],
+  "globalPrompt": ""
+}
