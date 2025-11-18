@@ -5,6 +5,11 @@ import { redirect } from "next/navigation";
 
 import { isAuthenticated } from "@/lib/actions/auth.action";
 
+export const metadata = {
+  title: "Alvas Institute of Engineering and Technology",
+  description: "Alva's AI Interview Assistant"
+};
+
 const Layout = async ({ children }: { children: ReactNode }) => {
   const isUserAuthenticated = await isAuthenticated();
   if (!isUserAuthenticated) redirect("/sign-in");
@@ -14,7 +19,7 @@ const Layout = async ({ children }: { children: ReactNode }) => {
       <nav>
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo.svg" alt="MockMate Logo" width={38} height={32} />
-          <h2 className="text-primary-100">Alva's Interview</h2>
+          <h2 className="text-primary-100">Alva's AI Interview</h2>
         </Link>
       </nav>
 
