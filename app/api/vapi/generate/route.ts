@@ -9,30 +9,28 @@ export async function POST(request: Request) {
     const { type, role, level, techstack, amount, userid } =
       await request.json();
 
-    // Prompt to generate dynamic questions for ANY technology
+    // Build a strong prompt that forces model to ONLY use provided technologies
     const prompt = `
-      You are an intelligent interview generator.
+      You are an intelligent AI interview question generator.
 
       Create EXACTLY ${amount} interview questions.
 
-      ROLE: ${role}
-      EXPERIENCE LEVEL: ${level}
-      TECH SKILLS PROVIDED BY CANDIDATE: ${techstack}
-      INTERVIEW STYLE: ${type} (Behavioral / Technical / Mixed)
+      CANDIDATE DETAILS:
+      - ROLE: ${role}
+      - EXPERIENCE LEVEL: ${level}
+      - TECH STACK: ${techstack}
+      - INTERVIEW TYPE: ${type} (Technical / Behavioral / Mixed)
 
-      Only generate questions based on the technology the candidate knows.
-      ❗ For example:
-      - If techstack includes Python → Ask Python questions
-      - If techstack includes HTML → Ask HTML questions
-      - If techstack includes Java → Ask Java questions
-      - If techstack includes SQL → Ask SQL questions
-      - If techstack includes React → Ask React questions
-      DO NOT ask irrelevant questions like Next.js unless it is in the techstack.
+      RULES:
+      ❗ ONLY generate questions based on technologies provided in TECH STACK.
+      ❗ DO NOT assume Next.js, React, Java, Python, SQL, or anything else
+         unless it is explicitly mentioned by the user.
+      ❗ If multiple skills are provided, mix them properly.
 
-      FORMAT STRICTLY AS ARRAY:
+      FORMAT STRICTLY AS A PURE JSON ARRAY:
       ["Question 1", "Question 2", "Question 3"]
 
-      DO NOT include extra text, no explanation, no markdown.
+      NO markdown, NO extra text, NO labels, NO explanations.
     `;
 
     const { text: aiResponse } = await generateText({
@@ -40,14 +38,26 @@ export async function POST(request: Request) {
       prompt,
     });
 
-    // Parse clean response
-    const questions = JSON.parse(aiResponse);
+    // Safely parse the AI output
+    let questions: string[] = [];
+    try {
+      questions = JSON.parse(aiResponse);
+    } catch (err) {
+      console.error("JSON parse error:", err);
+      return Response.json(
+        {
+          success: false,
+          error: "Model returned invalid JSON. Check prompt formatting.",
+        },
+        { status: 500 }
+      );
+    }
 
     const interview = {
       role,
       type,
       level,
-      techstack: techstack.split(",").map((t: string) => t.trim()), // FIXED
+      techstack: techstack.split(",").map((t: string) => t.trim()),
       questions,
       userId: userid,
       finalized: true,
