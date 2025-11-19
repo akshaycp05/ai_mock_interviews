@@ -5,32 +5,50 @@ import { db } from "@/firebase/admin";
 import { getRandomInterviewCover } from "@/lib/utils";
 
 export async function POST(request: Request) {
-  const { type, role, level, techstack, amount, userid } = await request.json();
-
   try {
-    const { text: questions } = await generateText({
+    const { type, role, level, techstack, amount, userid } =
+      await request.json();
+
+    // Prompt to generate dynamic questions for ANY technology
+    const prompt = `
+      You are an intelligent interview generator.
+
+      Create EXACTLY ${amount} interview questions.
+
+      ROLE: ${role}
+      EXPERIENCE LEVEL: ${level}
+      TECH SKILLS PROVIDED BY CANDIDATE: ${techstack}
+      INTERVIEW STYLE: ${type} (Behavioral / Technical / Mixed)
+
+      Only generate questions based on the technology the candidate knows.
+      ❗ For example:
+      - If techstack includes Python → Ask Python questions
+      - If techstack includes HTML → Ask HTML questions
+      - If techstack includes Java → Ask Java questions
+      - If techstack includes SQL → Ask SQL questions
+      - If techstack includes React → Ask React questions
+      DO NOT ask irrelevant questions like Next.js unless it is in the techstack.
+
+      FORMAT STRICTLY AS ARRAY:
+      ["Question 1", "Question 2", "Question 3"]
+
+      DO NOT include extra text, no explanation, no markdown.
+    `;
+
+    const { text: aiResponse } = await generateText({
       model: google("gemini-2.0-flash-001"),
-      prompt: `Prepare questions for a job interview.
-        The job role is ${role}.
-        The job experience level is ${level}.
-        The tech stack used in the job is: ${techstack}.
-        The focus between behavioural and technical questions should lean towards: ${type}.
-        The amount of questions required is: ${amount}.
-        Please return only the questions, without any additional text.
-        The questions are going to be read by a voice assistant so do not use "/" or "*" or any other special characters which might break the voice assistant.
-        Return the questions formatted like this:
-        ["Question 1", "Question 2", "Question 3"]
-        
-        Thank you! <3
-    `,
+      prompt,
     });
 
+    // Parse clean response
+    const questions = JSON.parse(aiResponse);
+
     const interview = {
-      role: role,
-      type: type,
-      level: level,
-      techstack: techstack.split(","),
-      questions: JSON.parse(questions),
+      role,
+      type,
+      level,
+      techstack: techstack.split(",").map((t: string) => t.trim()), // FIXED
+      questions,
       userId: userid,
       finalized: true,
       coverImage: getRandomInterviewCover(),
@@ -41,11 +59,11 @@ export async function POST(request: Request) {
 
     return Response.json({ success: true }, { status: 200 });
   } catch (error) {
-    console.error("Error:", error);
-    return Response.json({ success: false, error: error }, { status: 500 });
+    console.error("Error generating interview:", error);
+    return Response.json({ success: false, error }, { status: 500 });
   }
 }
 
 export async function GET() {
-  return Response.json({ success: true, data: "Thank you!" }, { status: 200 });
+  return Response.json({ success: true, message: "API working" });
 }
