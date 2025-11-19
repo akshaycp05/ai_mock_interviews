@@ -9,13 +9,13 @@ export default function InterviewFormPage() {
   const [role, setRole] = useState("");
   const [level, setLevel] = useState("");
   const [techstack, setTechstack] = useState("");
-  const [amount, setAmount] = useState(5);
   const [type, setType] = useState("Technical");
+  const [amount, setAmount] = useState(5);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async () => {
+  const handleGenerate = async () => {
     if (!role || !level || !techstack) {
-      alert("Please fill all fields.");
+      alert("Please fill all fields!");
       return;
     }
 
@@ -23,7 +23,7 @@ export default function InterviewFormPage() {
 
     const userId = localStorage.getItem("userId");
 
-    const response = await fetch("/api/vapi/generate", {
+    const res = await fetch("/api/vapi/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -36,13 +36,12 @@ export default function InterviewFormPage() {
       }),
     });
 
-    const data = await response.json();
+    const data = await res.json();
 
     if (data.success) {
-      // redirect to home → interview will appear in list
       router.push("/");
     } else {
-      alert("Interview generation failed.");
+      alert("Failed to generate interview");
     }
 
     setLoading(false);
@@ -53,33 +52,30 @@ export default function InterviewFormPage() {
       <h2 className="text-2xl font-bold">Create Your Interview</h2>
 
       <input
-        type="text"
-        placeholder="Job Role (e.g. Python Developer)"
+        className="input border p-2 rounded"
+        placeholder="Role (e.g., Python Developer)"
         value={role}
         onChange={(e) => setRole(e.target.value)}
-        className="input border p-2 rounded"
       />
 
       <input
-        type="text"
-        placeholder="Experience Level (e.g. Fresher, Mid, Senior)"
+        className="input border p-2 rounded"
+        placeholder="Experience Level (e.g., Fresher, Mid, Senior)"
         value={level}
         onChange={(e) => setLevel(e.target.value)}
-        className="input border p-2 rounded"
       />
 
       <input
-        type="text"
-        placeholder="Tech Stack (e.g. React, Node, MongoDB)"
+        className="input border p-2 rounded"
+        placeholder="Tech Stack (e.g., Python, Django, SQL)"
         value={techstack}
         onChange={(e) => setTechstack(e.target.value)}
-        className="input border p-2 rounded"
       />
 
       <select
+        className="input border p-2 rounded"
         value={type}
         onChange={(e) => setType(e.target.value)}
-        className="input border p-2 rounded"
       >
         <option value="Technical">Technical</option>
         <option value="Behavioral">Behavioral</option>
@@ -88,16 +84,16 @@ export default function InterviewFormPage() {
 
       <input
         type="number"
-        min="1"
-        max="20"
+        min={1}
+        max={20}
+        className="input border p-2 rounded"
         value={amount}
         onChange={(e) => setAmount(Number(e.target.value))}
-        className="input border p-2 rounded"
       />
 
       <button
-        onClick={handleSubmit}
-        className="btn-primary bg-blue-600 text-white p-2 rounded"
+        onClick={handleGenerate}
+        className="bg-blue-600 p-2 text-white rounded"
       >
         {loading ? "Generating..." : "Generate Interview"}
       </button>
